@@ -5,6 +5,7 @@ from rclpy.node import Node
 from vision_msgs.msg import Detection2DArray
 from vision_msgs.msg import ObjectHypothesisWithPose
 from math import sqrt
+from datetime import datetime
 
 # ----- To Run the node -----
 # ros2 run inputCSVSubscriber inputCSVSubscriber 
@@ -23,7 +24,7 @@ class ObjectSubscriber(Node):
         #self.file = open("csv/test3.csv", "w", newline="")
         self.file = open(f"csv/{self.name}.csv", "w", newline="")
         self.write = csv.writer(self.file)
-        self.write.writerow(["Class ID", "ID", "Confidence LV", "x_initial", "y_initial", "x_final", "y_final"])
+        self.write.writerow(["Class ID", "ID", "Confidence LV", "x_initial", "y_initial", "x_final", "y_final", "datetime"])
     
     def callback(self, msg):
         # Shut down the node once the first 500 moving objects are collected
@@ -54,7 +55,7 @@ class ObjectSubscriber(Node):
                 self.count+= 1
                 self.get_logger().info(f"Current count: {self.count}")
                 self.get_logger().info(f"Detected {class_id} ID#{object_id} at initial: ({x_initial:.1f}, {y_initial:.1f}) | final ({x_final:.1f}, {y_final:.1f})\n")
-                self.write.writerow([class_id, object_id, f"{confidence:.4f}", int(x_initial), int(y_initial), int(x_final), int(y_final)])
+                self.write.writerow([class_id, object_id, f"{confidence:.4f}", int(x_initial), int(y_initial), int(x_final), int(y_final), datetime.now()])
                 # Get the first 100 objects as reference
                 if (self.count >= 10000):
                     self.get_logger().info("10000 moving objects detected!")
