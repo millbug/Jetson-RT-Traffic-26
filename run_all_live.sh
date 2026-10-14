@@ -2,6 +2,7 @@
 
 # Start the same active components as run_all.sh, but use an RTSP/live source.
 # Usage: ./run_all_live.sh 'rtsp://user:password@camera.example:554/stream1' [base_csv]
+# Set ROS_WORKSPACE to override automatic workspace detection.
 
 set -euo pipefail
 
@@ -13,13 +14,28 @@ fi
 STREAM_URL="$1"
 BASE_FILE="${2:-}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKSPACE_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+WORKSPACE_DIR="${ROS_WORKSPACE:-}"
+
+if [[ -z "${WORKSPACE_DIR}" ]]; then
+    # Support both common layouts:
+    #   ~/Jetson-RT-Traffic-26       with ~/install/setup.bash
+    #   ~/ros2_ws/src/Jetson-RT-Traffic-26 with ~/ros2_ws/install/setup.bash
+    for candidate in "${SCRIPT_DIR}/.." "${SCRIPT_DIR}/../.." "${SCRIPT_DIR}"; do
+        candidate="$(cd "${candidate}" && pwd)"
+        if [[ -f "${candidate}/install/setup.bash" ]]; then
+            WORKSPACE_DIR="${candidate}"
+            break
+        fi
+    done
+fi
+
 SETUP_SCRIPT="${WORKSPACE_DIR}/install/setup.bash"
 LAUNCH_FILE="${SCRIPT_DIR}/launch/deepstream_live.py"
 
 if [[ ! -f "${SETUP_SCRIPT}" ]]; then
     echo "ROS workspace setup file not found: ${SETUP_SCRIPT}" >&2
-    echo "Build from ${WORKSPACE_DIR} first: colcon build --packages-select video_streamer_cpp" >&2
+    echo "Set ROS_WORKSPACE to your workspace, then build it:" >&2
+    echo "  ROS_WORKSPACE=/path/to/workspace colcon build --packages-select video_streamer_cpp" >&2
     exit 1
 fi
 
