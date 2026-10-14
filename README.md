@@ -20,6 +20,21 @@ commands to run everything off of a mp4
 
 https://wzmedia.dot.ca.gov/D3/28_JCT267_JWO_KINGS_BEACH_PLA28_EB.stream/playlist.m3u8
 
+## RTSP input
+
+`video_streamer_node` accepts a local file or a stream URI. Start it directly with:
+
+```bash
+ros2 run video_streamer_cpp video_streamer_node --ros-args \
+  -p source:=rtsp://user:password@camera.example:554/stream1 \
+  -p backend:=ffmpeg -p width:=960 -p height:=544 -p fps:=30
+```
+
+`video_filepath` remains supported for the existing launch files. For RTSP cameras,
+prefer `source`; the node recognizes it as live input and reconnects after a dropped
+stream rather than seeking back to frame zero. `backend` can be `auto` (default),
+`ffmpeg`, or `gstreamer`, depending on how OpenCV was built on the device.
+
 #!/bin/bash 
 
 # Terminal 1:  Image view    

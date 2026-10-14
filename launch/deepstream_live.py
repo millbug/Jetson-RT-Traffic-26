@@ -15,9 +15,15 @@ def generate_launch_description():
         default_value=hls_url,
         description='Path or URL to the video stream (supports HLS .m3u8 URLs)'
     )
+    backend_arg = DeclareLaunchArgument(
+        'backend',
+        default_value='auto',
+        description='OpenCV capture backend: auto, ffmpeg, or gstreamer'
+    )
     
     return LaunchDescription([
         video_path_arg,
+        backend_arg,
 
         # DeepStream tracking/detection node
         Node(
@@ -37,7 +43,8 @@ def generate_launch_description():
             name='video_publisher_node',
             output='screen',
             parameters=[{
-                'video_filepath': LaunchConfiguration('video_path'),
+                'source': LaunchConfiguration('video_path'),
+                'backend': LaunchConfiguration('backend'),
                 'width': 960,
                 'height': 544,
                 'fps': 24  # 30 FPS is more realistic for HLS sources
