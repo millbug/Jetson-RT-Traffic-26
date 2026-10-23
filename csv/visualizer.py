@@ -1,7 +1,17 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import sys
 
-df = pd.read_csv("base_clustered11.csv")
+if len(sys.argv) < 2:
+    print("Error: Please provide a filename when launching.")
+    sys.exit(1)
+
+if ".csv" not in sys.argv[1]:
+    print("Error: Please provide a .csv file.")
+
+file_to_process = sys.argv[1]
+
+df = pd.read_csv(file_to_process)
 
 cluster_colors = {
     0: "tab:blue",
