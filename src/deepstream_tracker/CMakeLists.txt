@@ -3,6 +3,7 @@ project(deepstream_tracker)
 
 # --- ROS 2 dependencies ---
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(vision_msgs REQUIRED)
@@ -17,7 +18,7 @@ pkg_check_modules(GST_APP REQUIRED gstreamer-app-1.0)
 include_directories(
   ${GST_INCLUDE_DIRS}
   ${GST_APP_INCLUDE_DIRS}
-  /opt/nvidia/deepstream/deepstream/sources/includes
+  /opt/nvidia/deepstream/deepstream-9.2/includes
 )
 
 link_directories(
@@ -26,10 +27,10 @@ link_directories(
 )
 
 # --- DeepStream libraries ---
-find_library(NVDSGST_META_LIB nvdsgst_meta PATHS /opt/nvidia/deepstream/deepstream/lib REQUIRED)
-find_library(NVDS_META_LIB nvds_meta PATHS /opt/nvidia/deepstream/deepstream/lib REQUIRED)
-find_library(NVDS_INFER_LIB nvds_infer PATHS /opt/nvidia/deepstream/deepstream/lib REQUIRED)
-find_library(NVDS_INFERUTILS_LIB nvds_inferutils PATHS /opt/nvidia/deepstream/deepstream/lib REQUIRED)
+find_library(NVDSGST_META_LIB nvdsgst_meta PATHS /opt/nvidia/deepstream/deepstream-9.2/lib REQUIRED)
+find_library(NVDS_META_LIB nvds_meta PATHS /opt/nvidia/deepstream/deepstream-9.2/lib REQUIRED)
+find_library(NVDS_INFER_LIB nvds_infer PATHS /opt/nvidia/deepstream/deepstream-9.2/lib REQUIRED)
+find_library(NVDS_INFERUTILS_LIB nvds_inferutils PATHS /opt/nvidia/deepstream/deepstream-9.2/lib REQUIRED)
 find_library(CUDART_LIB cudart PATHS /usr/local/cuda/lib64 REQUIRED)
 
 # --- Build executable ---
@@ -38,6 +39,7 @@ add_executable(deepstream_tracker_node
 )
 
 ament_target_dependencies(deepstream_tracker_node
+  ament_index_cpp
   rclcpp 
   sensor_msgs 
   vision_msgs
@@ -57,7 +59,7 @@ target_link_libraries(deepstream_tracker_node
 
 # --- Install rpath for runtime linking ---
 set_target_properties(deepstream_tracker_node PROPERTIES
-  INSTALL_RPATH "/opt/nvidia/deepstream/deepstream/lib;/usr/local/cuda/lib64"
+  INSTALL_RPATH "/opt/nvidia/deepstream/deepstream-9.2/lib;/usr/local/cuda/lib64"
 )
 
 # --- Install targets ---

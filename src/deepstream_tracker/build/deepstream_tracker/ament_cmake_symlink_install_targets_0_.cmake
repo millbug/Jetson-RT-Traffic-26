@@ -1,0 +1,1 @@
+ament_cmake_symlink_install_targets("TARGET_FILES" "/home/nvidia/Jetson-RT-Traffic-26/src/deepstream_tracker/build/deepstream_tracker/deepstream_tracker_node" "TARGETS" "deepstream_tracker_node" "DESTINATION" "lib/deepstream_tracker")

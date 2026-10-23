@@ -2,7 +2,7 @@
 <package format="3">
   <name>deepstream_tracker</name>
   <version>0.1.0</version>
-  <description>ROS2 Humble node using DeepStream 7.1 + TrafficCamNet + nvtracker</description>
+  <description>ROS 2 Jazzy node using DeepStream and TrafficCamNet with nvtracker</description>
   <maintainer email="you@example.com">you</maintainer>
   <license>Apache-2.0</license>
 
@@ -15,8 +15,11 @@
   <test_depend>ament_lint_common</test_depend>
 
   <depend>rclcpp</depend>
+  <depend>ament_index_cpp</depend>
   <depend>sensor_msgs</depend>
   <depend>vision_msgs</depend>
+  <depend>image_transport</depend>
+  <depend>cv_bridge</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

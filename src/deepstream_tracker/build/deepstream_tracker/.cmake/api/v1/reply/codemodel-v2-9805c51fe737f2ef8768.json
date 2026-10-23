@@ -1,0 +1,79 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-c62dc8898229e8fab971.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"name" : "",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "deepstream_tracker",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "deepstream_tracker_node::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-deepstream_tracker_node-c6be45cc4aa7daf0091a.json",
+					"name" : "deepstream_tracker_node",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "deepstream_tracker_uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-deepstream_tracker_uninstall-975305615eb6d57c0c26.json",
+					"name" : "deepstream_tracker_uninstall",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "uninstall::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-uninstall-84f83815b8bc8183ca8a.json",
+					"name" : "uninstall",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/nvidia/Jetson-RT-Traffic-26/src/deepstream_tracker/build/deepstream_tracker",
+		"source" : "/home/nvidia/Jetson-RT-Traffic-26/src/deepstream_tracker"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 6
+	}
+}

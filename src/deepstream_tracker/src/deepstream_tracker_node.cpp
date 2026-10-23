@@ -5,7 +5,7 @@
 #include <vision_msgs/msg/object_hypothesis_with_pose.hpp>
 #include <sensor_msgs/msg/image.hpp>
 
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 #include <opencv2/opencv.hpp>
 
 #include <gst/gst.h>
@@ -145,7 +145,7 @@ private:
         // nvinfer & tracker settings
         g_object_set(G_OBJECT(pgie_elt), "config-file-path", pgie.c_str(), NULL);
         g_object_set(G_OBJECT(tracker), "ll-config-file", tracker_cfg.c_str(), NULL);
-        g_object_set(G_OBJECT(tracker), "ll-lib-file", "/opt/nvidia/deepstream/deepstream/lib/libnvds_nvmultiobjecttracker.so", NULL);
+        g_object_set(G_OBJECT(tracker), "ll-lib-file", "/opt/nvidia/deepstream/deepstream-9.2/lib/libnvds_nvmultiobjecttracker.so", NULL);
         g_object_set(G_OBJECT(tracker),
                      "tracker-width", 640,
                      "tracker-height", 384,

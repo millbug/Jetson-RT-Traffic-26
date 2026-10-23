@@ -1,0 +1,7 @@
+[01m[K/home/nvidia/Jetson-RT-Traffic-26/src/deepstream_tracker/src/deepstream_tracker_node.cpp:3:10:[m[K [01;31m[Kfatal error: [m[Kament_index_cpp/get_package_share_directory.hpp: No such file or directory
+    3 | #include [01;31m[K"ament_index_cpp/get_package_share_directory.hpp"[m[K
+      |          [01;31m[K^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+compilation terminated.
+gmake[2]: *** [CMakeFiles/deepstream_tracker_node.dir/build.make:76: CMakeFiles/deepstream_tracker_node.dir/src/deepstream_tracker_node.cpp.o] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:137: CMakeFiles/deepstream_tracker_node.dir/all] Error 2
+gmake: *** [Makefile:146: all] Error 2
