@@ -27,13 +27,6 @@ class ObjectSubscriber(Node):
         self.write.writerow(["Class ID", "ID", "Confidence LV", "x_initial", "y_initial", "x_final", "y_final", "datetime"])
     
     def callback(self, msg):
-        # Shut down the node once the first 500 moving objects are collected
-        if (self.count >= 10000):
-            self.get_logger("10000 objects detected! Shutting down...")
-            self.file.close()
-            rclpy.shutdown()
-            return 
-        
         # Loop through the detected topic message and write them to the csv
         for detection in msg.detections:
             class_id = detection.results[0].hypothesis.class_id
@@ -56,12 +49,6 @@ class ObjectSubscriber(Node):
                 self.get_logger().info(f"Current count: {self.count}")
                 self.get_logger().info(f"Detected {class_id} ID#{object_id} at initial: ({x_initial:.1f}, {y_initial:.1f}) | final ({x_final:.1f}, {y_final:.1f})\n")
                 self.write.writerow([class_id, object_id, f"{confidence:.4f}", int(x_initial), int(y_initial), int(x_final), int(y_final), datetime.now()])
-                # Get the first 100 objects as reference
-                if (self.count >= 10000):
-                    self.get_logger().info("10000 moving objects detected!")
-                    self.file.close()
-                    rclpy.shutdown()
-                    return
 def main():
     # Parse command-line argument
     if (len(sys.argv) > 1):
