@@ -53,7 +53,7 @@ class KMeansClusteringNode(Node):
             df = pd.read_csv(self.input_csv)
             
             # Validate required columns
-            required_columns = ['ID', 'x_initial', 'y_initial', 'x_final', 'y_final']
+            required_columns = ['ID', 'x_initial', 'y_initial', 'x_mid1', 'y_mid1', 'x_mid2', 'y_mid2', 'x_mid3', 'y_mid3', 'x_final', 'y_final']
             missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
@@ -141,6 +141,12 @@ class KMeansClusteringNode(Node):
             # Grab x,y initials and finals
             x_initial = detection.results[0].pose.pose.position.x
             y_initial = detection.results[0].pose.pose.position.y
+            x_mid1 = detection.results[0].pose.pose.position.x # what is index for mid values?
+            y_mid1 = detection.results[0].pose.pose.position.y
+            x_mid2 = detection.results[0].pose.pose.position.x
+            y_mid2 = detection.results[0].pose.pose.position.y
+            x_mid3 = detection.results[0].pose.pose.position.x
+            y_mid3 = detection.results[0].pose.pose.position.y
             x_final = detection.bbox.center.position.x
             y_final = detection.bbox.center.position.y
             

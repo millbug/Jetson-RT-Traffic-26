@@ -20,6 +20,7 @@
 #include <vector>
 #include <filesystem>
 #include <mutex>
+#include <cmath>
 
 using vision_msgs::msg::Detection2D;
 using vision_msgs::msg::Detection2DArray;
@@ -58,6 +59,80 @@ cv::Mat convertToRGB8(const sensor_msgs::msg::Image::ConstSharedPtr &msg, rclcpp
     return frame;
 }
 
+std::vector<cv::Point2f> sampleTrajectory(
+    const std::vector<cv::Point2f>& trajectory)
+{
+    std::vector<cv::Point2f> sampled_points;
+
+    if (trajectory.empty()) {
+        return sampled_points;
+    }
+
+    // edge case for trajectory w/ only one point
+    if (trajectory.size() == 1) {
+        return std::vector<cv::Point2f>(5, trajectory.front());
+    }
+
+    // calculating cumulative distance along the trajectory
+    std::vector<double> cumulative_distance(trajectory.size(), 0.0);
+
+    for (size_t i = 1; i < trajectory.size(); i++) {
+
+        double dx = trajectory[i].x - trajectory[i - 1].x;
+        double dy = trajectory[i].y - trajectory[i - 1].y;
+
+        double segment_distance = std::sqrt(dx * dx + dy * dy);
+
+        cumulative_distance[i] =
+            cumulative_distance[i - 1] + segment_distance;
+    }
+
+    double total_distance = cumulative_distance.back();
+
+    if (total_distance == 0.0) {
+        return std::vector<cv::Point2f>(5, trajectory.front());
+    }
+
+    // five points at equal intervals, based on total distance
+    for (int i = 0; i < 5; i++) {
+
+        double target_distance = total_distance * i / 4.0;
+
+        // find the trajectory segment containing the target distance.
+        size_t j = 1;
+
+        while (j < cumulative_distance.size() &&
+               cumulative_distance[j] < target_distance) {
+            j++;
+        }
+
+        if (j >= trajectory.size()) {
+            sampled_points.push_back(trajectory.back());
+            continue;
+        }
+
+        double segment_length =
+            cumulative_distance[j] - cumulative_distance[j - 1];
+
+        double t = 0.0;
+
+        if (segment_length > 0.0) {
+            t = (target_distance - cumulative_distance[j - 1])
+                / segment_length;
+        }
+
+        // interpolate the x and y coordinates.
+        float x = trajectory[j - 1].x +
+                  t * (trajectory[j].x - trajectory[j - 1].x);
+
+        float y = trajectory[j - 1].y +
+                  t * (trajectory[j].y - trajectory[j - 1].y);
+
+        sampled_points.emplace_back(x, y);
+    }
+
+    return sampled_points;
+}
 
 class DeepStreamTrackerNode : public rclcpp::Node {
 public:
@@ -339,6 +414,12 @@ private:
 			// Last-seen same as first-seen
 			track.last_x = track.first_x;
 			track.last_y = track.first_y;
+
+            // Add first position to complete trajectory
+            track.trajectory.emplace_back(
+                track.first_x,
+                track.first_y
+            );
                         
 			node->active_tracks_.emplace(track_id, std::move(track));
 		    } else {
@@ -375,23 +456,32 @@ private:
 					double avg_conf = track.sum_confidence / track.count;
 
 					vision_msgs::msg::Detection2D det;
-					det.id = std::to_string(id);
+                    det.id = std::to_string(id);
 
-					// Last-seen pixel (final position)
-					det.bbox.center.position.x = track.last_x;
-					det.bbox.center.position.y = track.last_y;
-	
-					ObjectHypothesisWithPose hyp;
-            				hyp.hypothesis.class_id = track.class_name;
-            				hyp.hypothesis.score = avg_conf;
+                    // Preserve final position in bounding box
+                    det.bbox.center.position.x = track.last_x;
+                    det.bbox.center.position.y = track.last_y;
 
-            				// FIRST-SEEN pixel (initial position) stored here
-            				hyp.pose.pose.position.x = track.first_x;
-           				hyp.pose.pose.position.y = track.first_y;
-            				hyp.pose.pose.position.z = 0.0;
+                    // Sample five equally spaced trajectory points
+                    std::vector<cv::Point2f> sampled_points =
+                        sampleTrajectory(track.trajectory);
 
-					det.results.emplace_back(hyp);
-					summary_array.detections.emplace_back(det);
+                    // Store all five points in the Detection2D results vector
+                    for (const auto& point : sampled_points) {
+
+                        ObjectHypothesisWithPose hyp;
+
+                        hyp.hypothesis.class_id = track.class_name;
+                        hyp.hypothesis.score = avg_conf;
+
+                        hyp.pose.pose.position.x = point.x;
+                        hyp.pose.pose.position.y = point.y;
+                        hyp.pose.pose.position.z = 0.0;
+
+                        det.results.emplace_back(hyp);
+}
+
+summary_array.detections.emplace_back(det);
 
 					to_remove.push_back(id);
 				}
@@ -458,7 +548,11 @@ private:
 	float first_y{0.0f};
 	float last_x{0.0f};
 	float last_y{0.0f};
-	bool still_active{false};
+	
+    // Store the complete vehicle trajectory
+    std::vector<cv::Point2f> trajectory;
+
+    bool still_active{false};
   };
 
   std::unordered_map<uint64_t, TrackInfo> active_tracks_;

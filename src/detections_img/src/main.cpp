@@ -5,7 +5,8 @@
 #include "opencv2/opencv.hpp"
 #include <map>
 #include <vector>
-#include <deque>
+#include <cmath>
+#include <set>
 
 class DrawingNode : public rclcpp::Node {
 public:
@@ -13,8 +14,8 @@ public:
         RCLCPP_INFO(this->get_logger(), "Drawing node has started up!");
 
         // Declare parameter for trail length
-        this->declare_parameter<int>("trail_length", 30);  // number of points to keep
-        max_trail_length_ = this->get_parameter("trail_length").as_int();
+        //this->declare_parameter<int>("trail_length", 30);  // number of points to keep
+        //max_trail_length_ = this->get_parameter("trail_length").as_int();
 
         image_sub_ = this->create_subscription<sensor_msgs::msg::Image>(
             "/image_raw", 4,
@@ -35,7 +36,6 @@ private:
     
     // Trail tracking: map from object ID to deque of center points
     std::map<std::string, std::deque<cv::Point2f>> object_trails_;
-    int max_trail_length_;
 
     void image_callback(const sensor_msgs::msg::Image::SharedPtr msg) {
         try {
@@ -75,10 +75,6 @@ private:
             auto& trail = object_trails_[obj_id];
             trail.push_back(center);
             
-            // Limit trail length
-            if (trail.size() > max_trail_length_) {
-                trail.pop_front();
-            }
         }
 
         // Remove trails for IDs that are no longer present
@@ -90,19 +86,61 @@ private:
             }
         }
 
-        // Draw all trails first (so they appear behind bounding boxes)
+        // Draw all trajectories and their five sampled points
         for (const auto& [obj_id, trail] : object_trails_) {
+
             if (trail.size() < 2) continue;
-            
-            // Draw trail as connected line segments
+
+            // Draw original complete trajectory
             for (size_t i = 1; i < trail.size(); ++i) {
-                // Optional: fade older points by making them more transparent/thinner
+
                 float alpha = static_cast<float>(i) / trail.size();
-                int thickness = std::max(1, static_cast<int>(alpha * 3));
-                
-                cv::line(img, trail[i-1], trail[i], cv::Scalar(255, 255, 0), thickness);
-            }
+
+                int thickness = std::max(1, static_cast<int>(alpha * 3)
+            );
+
+            cv::line(
+                img,
+                trail[i - 1],
+                trail[i],
+                cv::Scalar(255, 255, 0),
+                thickness
+            );
         }
+
+        // Calculate five equally spaced points
+        std::vector<cv::Point2f> sampled_points =
+            sampleTrajectory(trail);
+
+        // Draw the five points
+        for (size_t i = 0; i < sampled_points.size(); ++i) {
+
+            cv::Point point(
+                static_cast<int>(std::round(sampled_points[i].x)),
+                static_cast<int>(std::round(sampled_points[i].y))
+            );
+
+            // Draw a filled red circle
+            cv::circle(
+                img,
+                point,
+                5,
+                cv::Scalar(0, 0, 255),
+                -1
+            );
+
+            // Label each point
+            cv::putText(
+                img,
+                std::to_string(i + 1),
+                cv::Point(point.x + 7, point.y - 7),
+                cv::FONT_HERSHEY_SIMPLEX,
+                0.5,
+                cv::Scalar(255, 255, 255),
+                1
+            );
+        }
+    }
 
         // Second pass: draw bounding boxes and labels
         for (const auto &box : latest_boxes_->detections){
